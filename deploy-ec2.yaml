@@ -272,12 +272,20 @@ Resources:
               echo "File ownership:"
               ls -la "/home/ubuntu/MAAP-Files/environment"
           }
-          build_docker_and_deploy_images() {
+          build_docker_images() {
               echo "Building Docker images..."
               cd /home/ubuntu/MAAP-Files/MAAP-Temporal || { echo "MAAP-Temporal directory not found. Exiting."; exit 1; }
               chmod +x build-images.ksh || echo "Failed to set executable permission for build-images.ksh."
               if ! ./build-images.ksh; then
                  { echo "Docker image build failed.  Exiting."; exit 1; }
+              fi
+          }
+
+          deploy_services() {
+              echo "Starting Docker services..."
+              
+              if ! docker-compose up -d; then
+                 { echo "Docker Compose failed to start services. Exiting."; exit 1; }
               fi
           }
 
@@ -289,7 +297,8 @@ Resources:
               setup_main_env_file
               deploy_mongodb
               setup_services_env_files
-              build_docker_and_deploy_images
+              build_docker_images
+              deploy_services
               echo "Instance initialization completed at $(date)."
           }
 

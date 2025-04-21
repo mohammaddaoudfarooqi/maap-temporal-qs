@@ -21,7 +21,3 @@ docker build  --tag 'semantic-cache' .
 
 cd ../host
 docker build  --tag 'host' .
-
-cd ..
-
-docker-compose up -d

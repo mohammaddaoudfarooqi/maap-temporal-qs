@@ -1,4 +1,4 @@
-# AI Knowledge and Memory Service Documentation
+# AI-Memory-Service
 
 ## Table of Contents
 1. [Overview](#1-overview)
@@ -14,18 +14,18 @@
 11. [Development Guide](#11-development-guide)
 12. [Maintenance & Operations](#12-maintenance--operations)
 
-## 1. Overview
+### 1. Overview
 
-The AI Knowledge and Memory Service is a sophisticated system designed to enhance AI interactions by providing long-term memory and contextual understanding. It allows AI assistants to remember and recall information from past conversations, improving the continuity and personalization of interactions.
+AI-Memory-Service is an advanced AI-powered memory management system designed to store, retrieve, and analyze conversation histories and user memories. It leverages MongoDB for data storage, AWS Bedrock for AI capabilities, and FastAPI for API endpoints. The service provides functionalities for adding conversation messages, searching memories, generating conversation summaries, and managing a hierarchical memory structure.
 
 Key features include:
-- Storage and retrieval of conversation history
-- Generation of conversation summaries
-- Semantic search capabilities
-- Hierarchical memory storage with importance scoring
-- Integration with AWS Bedrock for embeddings and language model interactions
+- Conversation history storage and retrieval
+- Semantic search using vector embeddings
+- Dynamic memory importance scoring and pruning
+- AI-powered conversation summarization
+- Hybrid search combining full-text and semantic search
 
-## 2. System Architecture
+### 2. System Architecture
 
 ```mermaid
 graph TD
@@ -35,72 +35,51 @@ graph TD
     C --> E[Conversations Collection]
     C --> F[Memory Nodes Collection]
     D --> G[Embedding Model]
-    D --> H[Language Model]
+    D --> H[LLM Model]
 ```
 
-The system consists of a FastAPI server that interacts with a MongoDB database for data storage and AWS Bedrock for AI capabilities. The MongoDB database contains two main collections: Conversations and Memory Nodes. AWS Bedrock provides embedding generation and language model services.
+The system consists of a FastAPI server that interacts with MongoDB for data storage and AWS Bedrock for AI operations. The MongoDB database contains two main collections: Conversations and Memory Nodes. AWS Bedrock provides embedding generation and language model capabilities.
 
-## 3. Components
+### 3. Components
 
-```bash
+1. **FastAPI Server**
+   - Purpose: Handles HTTP requests and serves as the main entry point for the application
+   - Technologies: Python, FastAPI
+   - Interactions: Communicates with MongoDB and AWS Bedrock
 
-├── main.py                  # FastAPI app initialization and API routes
-├── config.py                # Configuration variables and constants
-├── database/
-│   ├── __init__.py
-│   ├── mongodb.py           # MongoDB connection and initialization
-│   └── models.py            # Database models and schema
-├── services/
-│   ├── __init__.py
-│   ├── bedrock.py           # AWS Bedrock integration
-│   ├── memory_service.py    # Memory operations
-│   ├── conversation_service.py  # Conversation operations
-│   └── embedding_service.py  # Embedding generation and vector operations
-├── utils/
-│   ├── __init__.py
-│   └── helpers.py           # Utility functions
-└── models/
-    ├── __init__.py
-    └── pydantic_models.py   # Pydantic models for requests/responses
-```
-### FastAPI Server
-- Purpose: Handles HTTP requests and orchestrates the system's operations
-- Technologies: Python, FastAPI
-- Interactions: Communicates with MongoDB and AWS Bedrock
+2. **MongoDB Database**
+   - Purpose: Stores conversation histories and memory nodes
+   - Technologies: MongoDB
+   - Collections:
+     - Conversations: Stores individual messages
+     - Memory Nodes: Stores hierarchical memory structure
 
-### MongoDB Database
-- Purpose: Stores conversation history and memory nodes
-- Collections:
-  - Conversations: Stores individual messages with vector embeddings
-  - Memory Nodes: Stores hierarchical memory structures with importance scoring
-- Interactions: Queried by the FastAPI server for data retrieval and storage
+3. **AWS Bedrock Integration**
+   - Purpose: Provides AI capabilities for embedding generation and language tasks
+   - Technologies: AWS Bedrock API
+   - Models:
+     - Embedding Model: Generates vector representations of text
+     - Language Model: Performs summarization and other NLP tasks
 
-### AWS Bedrock Integration
-- Purpose: Provides AI capabilities for embedding generation and language understanding
-- Services Used:
-  - Embedding Model: Generates vector representations of text
-  - Language Model: Performs text generation tasks like summarization
+4. **Memory Management System**
+   - Purpose: Manages the creation, updating, and pruning of memory nodes
+   - Key Features:
+     - Importance scoring
+     - Memory reinforcement and decay
+     - Automatic pruning of less important memories
 
-### Memory Service
-- Purpose: Manages the creation, updating, and pruning of memory nodes
-- Key Functions:
-  - Importance scoring of new memories
-  - Merging similar memories
-  - Pruning less important memories to maintain a manageable memory tree
+5. **Search System**
+   - Purpose: Enables efficient retrieval of relevant information
+   - Features:
+     - Hybrid search combining full-text and vector search
+     - Semantic similarity matching
 
-### Conversation Service
-- Purpose: Handles the storage and retrieval of conversation history
-- Key Functions:
-  - Adding new messages to conversations
-  - Performing hybrid searches (combining semantic and full-text search)
-  - Generating conversation summaries
-
-## 4. Installation & Deployment
+### 4. Installation & Deployment
 
 1. Clone the repository:
    ```
-   git clone [repository-url]
-   cd ai-memory
+   git clone https://github.com/mohammaddaoudfarooqi/AI-Memory-Service.git
+   cd AI-Memory-Service
    ```
 
 2. Install dependencies:
@@ -110,131 +89,79 @@ The system consists of a FastAPI server that interacts with a MongoDB database f
 
 3. Set up environment variables (see Configuration section)
 
-4. Run the FastAPI server:
+4. Deploy using Docker:
+   ```
+   docker build -t ai-memory-service .
+   docker run -p 8182:8182 ai-memory-service
+   ```
+
+### 5. Configuration
+
+Configure the application using environment variables or a `.env` file:
+
+```
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_REGION=us-east-1
+SUMMARY_MODEL_ID=us.anthropic.claude-3-7-sonnet-20250219-v1:0
+EMBEDDING_MODEL_ID=amazon.titan-embed-text-v1
+SERVICE_HOST=0.0.0.0
+SERVICE_PORT=8182
+DEBUG=False
+```
+
+### 6. Usage
+
+1. Start the server:
    ```
    python main.py
    ```
 
-For containerized deployment:
+2. Access the API at `http://localhost:8182`
 
-1. Build the Docker image:
-   ```
-   docker build -t ai-memory-service .
-   ```
+3. Use the provided endpoints to add messages, search memories, and retrieve conversation summaries
 
-2. Run the container:
-   ```
-   docker run -p 8182:8182 -e MONGODB_URI=your_mongodb_uri -e AWS_ACCESS_KEY_ID=your_key -e AWS_SECRET_ACCESS_KEY=your_secret ai-memory-service
-   ```
+### 7. API Reference
 
-## 5. Configuration
+- `POST /conversation/`: Add a message to the conversation history
+- `GET /retrieve_memory/`: Retrieve memory items, context, and similar memory nodes
+- `GET /health`: Health check endpoint
 
-Configure the application using environment variables or a `.env` file:
+For detailed request/response formats, refer to the Pydantic models in `models/pydantic_models.py`.
 
-- `MONGODB_URI`: MongoDB connection string
-- `AWS_ACCESS_KEY_ID`: AWS access key for Bedrock
-- `AWS_SECRET_ACCESS_KEY`: AWS secret key for Bedrock
-- `AWS_REGION`: AWS region for Bedrock services
-- `SUMMARY_MODEL_ID`: Bedrock model ID for summarization
-- `EMBEDDING_MODEL_ID`: Bedrock model ID for embedding generation
-
-Additional configuration constants are defined in `config.py`:
-
-- `MAX_DEPTH`: Maximum depth of the memory tree
-- `SIMILARITY_THRESHOLD`: Threshold for considering memories similar
-- `DECAY_FACTOR`: Factor for decaying importance of memories
-- `REINFORCEMENT_FACTOR`: Factor for reinforcing important memories
-
-## 6. Usage
-
-The service exposes two main endpoints:
-
-1. Adding a message to a conversation:
-   ```python
-   client.add_message(
-       conversation_id="conversation_1",
-       text="Hello, how can I help you today?",
-       message_type="ai"
-   )
-   ```
-
-2. Retrieving memory based on a query:
-   ```python
-   memory_info = client.retrieve_memory("What did we discuss about Japan?")
-   ```
-
-## 7. API Reference
-
-### POST /conversation/
-Add a message to the conversation history.
-
-Request Body:
-```json
-{
-  "user_id": "string",
-  "conversation_id": "string",
-  "type": "human" or "ai",
-  "text": "string",
-  "timestamp": "string" (optional)
-}
-```
-
-### GET /retrieve_memory/
-Retrieve memory items, context, summary, and similar memory nodes.
-
-Query Parameters:
-- `user_id`: string
-- `text`: string (query text)
-
-## 8. Security Considerations
+### 8. Security Considerations
 
 - Ensure proper authentication and authorization for API access
 - Use HTTPS for all communications
-- Regularly rotate AWS credentials
+- Regularly rotate AWS and MongoDB credentials
 - Implement rate limiting to prevent abuse
-- Sanitize and validate all user inputs
 
-## 9. Monitoring & Logging
+### 9. Monitoring & Logging
 
-- Use AWS CloudWatch for monitoring Bedrock usage
-- Implement application-level logging for server operations
-- Monitor MongoDB performance and usage
-- Set up alerts for error rates and API response times
-
-## 10. Troubleshooting
-
-Common issues and solutions:
-- Connection errors to MongoDB: Check network connectivity and MongoDB URI
-- AWS Bedrock errors: Verify AWS credentials and region settings
-- High latency: Monitor MongoDB query performance and optimize indexes
-
-## 11. Development Guide
-
-Key files and their purposes:
-- `main.py`: FastAPI application entry point
-- `config.py`: Configuration constants and environment variable loading
-- `services/conversation_service.py`: Conversation-related operations
-- `services/memory_service.py`: Memory management operations
-- `services/bedrock.py`: AWS Bedrock integration
-- `database/mongodb.py`: MongoDB connection and initialization
-- `models/pydantic_models.py`: Data models for API requests and responses
-
-To extend the system:
-1. Add new endpoints in `main.py`
-2. Implement corresponding service functions in appropriate service files
-3. Update data models in `pydantic_models.py` if needed
-4. Add new configuration options to `config.py` if required
-
-## 12. Maintenance & Operations
-
-Regular maintenance tasks:
-- Monitor and optimize MongoDB indexes
-- Review and adjust memory pruning parameters based on system performance
-- Keep dependencies updated, especially FastAPI and boto3
-- Regularly backup the MongoDB database
+- The application uses a custom `MaapLogger` for logging
+- Logs are stored both locally and sent to a remote logging service
 - Monitor AWS Bedrock usage and costs
+- Set up alerts for high memory usage or API errors
 
-Long-term considerations:
-- Evaluate the need for data archiving strategies as the system grows
-- Consider implementing a caching layer for frequently accessed memories
-- Explore multi-region deployment for improved latency and redundancy
+### 10. Troubleshooting
+
+- Check MongoDB connection if database operations fail
+- Verify AWS credentials if Bedrock API calls fail
+- Review logs for detailed error messages and stack traces
+
+### 11. Development Guide
+
+- Follow PEP 8 style guide for Python code
+- Use type hints and docstrings for better code readability
+- Run tests before submitting pull requests
+- Use the `@logger.log_function` decorator for automatic function logging
+
+### 12. Maintenance & Operations
+
+- Regularly update dependencies
+- Monitor and optimize MongoDB indexes
+- Review and adjust memory pruning settings as needed
+- Backup the MongoDB database regularly
+
+This documentation provides a comprehensive overview of the AI-Memory-Service. For further details on specific components or functionalities, refer to the inline comments and docstrings within the codebase.

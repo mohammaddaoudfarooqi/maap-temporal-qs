@@ -22,7 +22,7 @@ RUN mkdir -p uploaded_files && \
     chmod 755 uploaded_files
 USER notebook-user
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the API port
 EXPOSE 8184

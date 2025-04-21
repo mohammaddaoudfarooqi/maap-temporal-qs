@@ -20,7 +20,7 @@ AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 EMBEDDING_MODEL_ID = os.getenv("EMBEDDING_MODEL_ID", "amazon.titan-embed-text-v1")
 
 # File handling
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", os.path.join(os.getcwd(), "files"))
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", os.path.join(os.getcwd(), "uploaded_files"))
 MAX_DOCUMENT_CHARACTERS = int(os.getenv("MAX_DOCUMENT_CHARACTERS", "10000"))
 
 # Create upload directory if it doesn't exist
