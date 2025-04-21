@@ -2,8 +2,6 @@
     "maap": {
       "server_path": "maap_mcp/maap_mcp_server.py",
       "env": {
-        "MONGODB_URI": "",
-        "EMBEDDING_MODEL_ID": "amazon.titan-embed-text-v1"
       }
     }
   }
