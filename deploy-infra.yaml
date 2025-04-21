@@ -1,0 +1,210 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation template to create VPC, Security Group and IAM Role."
+
+Parameters:
+  AvailabilityZone:
+    Type: String
+    Description: EC2 Availability Zone
+  
+  ServerInstanceProfile:
+    Type: String
+    Description: EC2 Server Instance Profile Name
+    Default: "MAAPTemporalServerInstanceProfile"
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: MAAPTemporalVPC
+
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Ref AvailabilityZone
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: MAAPTemporalSubnet
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MAAPTemporalIGW
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: MAAPTemporalRouteTable
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet
+      RouteTableId: !Ref RouteTable
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for MAAP-Temporal-Stack"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - CidrIp: 3.77.23.139/32
+          IpProtocol: -1
+        - CidrIp: 14.200.46.128/29
+          IpProtocol: -1
+        - CidrIp: 77.107.233.160/29
+          IpProtocol: -1
+        - CidrIp: 83.221.128.34/32
+          IpProtocol: -1
+        - CidrIp: 213.41.116.16/29
+          IpProtocol: -1
+        - CidrIp: 123.103.203.216/29
+          IpProtocol: -1
+        - CidrIp: 74.113.166.152/29
+          IpProtocol: -1
+        - CidrIp: 124.254.96.131/32
+          IpProtocol: -1
+        - CidrIp: 44.220.233.194/32
+          IpProtocol: -1
+        - CidrIp: 204.153.194.96/29
+          IpProtocol: -1
+        - CidrIp: 104.30.134.192/32
+          IpProtocol: -1
+        - CidrIp: 14.98.65.56/29
+          IpProtocol: -1
+        - CidrIp: 50.175.168.144/29
+          IpProtocol: -1
+        - CidrIp: 61.246.212.64/29
+          IpProtocol: -1
+        - CidrIp: 104.30.134.190/32
+          IpProtocol: -1
+        - CidrIp: 63.32.217.76/32
+          IpProtocol: -1
+        - CidrIp: 206.252.195.126/32
+          IpProtocol: -1
+        - CidrIp: 104.30.134.191/32
+          IpProtocol: -1
+        - CidrIp: 50.175.175.240/29
+          IpProtocol: -1
+        - CidrIp: 104.30.134.193/32
+          IpProtocol: -1
+        - CidrIp: 104.30.164.0/28
+          IpProtocol: -1
+        - CidrIp: 97.77.203.56/29
+          IpProtocol: -1
+        - CidrIp: 13.201.114.222/32
+          IpProtocol: -1
+        - CidrIp: 81.101.80.80/28
+          IpProtocol: -1
+        - CidrIp: 14.195.102.136/29
+          IpProtocol: -1
+        - CidrIp: 162.213.133.99/32
+          IpProtocol: -1
+        - CidrIp: 8.29.231.53/32
+          IpProtocol: -1
+        - CidrIp: 4.35.206.216/29
+          IpProtocol: -1
+        - CidrIp: 18.228.127.246/32
+          IpProtocol: -1
+        - CidrIp: 12.196.188.168/29
+          IpProtocol: -1
+        - CidrIp: 104.30.176.2/32
+          IpProtocol: -1
+        - CidrIp: 104.30.134.187/32
+          IpProtocol: -1
+        - CidrIp: 104.30.134.189/32
+          IpProtocol: -1
+        - CidrIp: 104.30.134.188/32
+          IpProtocol: -1
+        - CidrIp: 212.56.8.40/29
+          IpProtocol: -1
+        - CidrIp: 207.251.78.32/29
+          IpProtocol: -1
+        - CidrIp: 89.101.148.232/29
+          IpProtocol: -1
+        - CidrIp: 104.30.160.1/32
+          IpProtocol: -1
+        - CidrIp: 104.30.134.186/32
+          IpProtocol: -1
+        - CidrIp: 182.76.117.48/29
+          IpProtocol: -1
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+      Tags:
+        - Key: Name
+          Value: MAAPTemporalSG
+
+
+  IAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: "ec2.amazonaws.com"
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
+      Tags:
+        - Key: Name
+          Value: MAAPTemporalRole
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref IAMRole
+      InstanceProfileName: !Ref ServerInstanceProfile
+
+Outputs:
+  VPCID:
+    Value: !Ref VPC
+    Description: "VPC ID"
+
+  SubnetID:
+    Value: !Ref Subnet
+    Description: "Subnet ID"
+
+  SecurityGroupID:
+    Value: !Ref SecurityGroup
+    Description: "Security Group ID"
+
+  IAMRoleARN:
+    Value: !GetAtt IAMRole.Arn
+    Description: "IAM Role ARN"
+    
+  IAMInstanceProfile:
+    Value: !Ref InstanceProfile
+    Description: "IAM Instance Profile Name"

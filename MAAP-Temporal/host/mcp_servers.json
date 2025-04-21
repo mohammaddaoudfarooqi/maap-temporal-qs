@@ -1,0 +1,9 @@
+{
+    "maap": {
+      "server_path": "maap_mcp/maap_mcp_server.py",
+      "env": {
+        "MONGODB_URI": "mongodb+srv://maapuser:8BlPOPibzjPDfJvk@maap-temporal.8iv8n.mongodb.net/?retryWrites=true&w=majority&appName=MAAP-Temporal",
+        "EMBEDDING_MODEL_ID": "amazon.titan-embed-text-v1"
+      }
+    }
+  }
