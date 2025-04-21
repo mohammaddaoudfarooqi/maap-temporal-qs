@@ -10,7 +10,7 @@ services:
   ai-memory:
     image: ai-memory
     env_file:
-      - environment/ai_memory/.env
+      - environment/ai-memory/.env
     depends_on:
       - event-logger
     networks:

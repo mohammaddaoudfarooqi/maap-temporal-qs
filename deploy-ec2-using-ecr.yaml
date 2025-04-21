@@ -91,7 +91,6 @@ Parameters:
     Type: String
     Default: amazon.titan-embed-text-v1
 
-
 Resources:
   EC2Instance:
     Type: AWS::EC2::Instance
@@ -173,11 +172,6 @@ Resources:
           EOF
           }
 
-          pull_docker_images() {
-              echo "Pulling Docker images..."
-              docker-compose pull || { echo "Docker Compose pull failed. Exiting."; exit 1; }
-          }
-
           deploy_mongodb() {
               echo "Deploying MongoDB cluster..."
               chmod +x mongodb_cluster_manager.ksh || echo "Failed to set executable permission for mongodb_cluster_manager.ksh."
@@ -191,71 +185,105 @@ Resources:
               fi
           }
 
-          # Function to create service folder and its .env file
+          # Function to create service folder and its .env file with proper permissions
           create_service_env() {
               local service_name=$1
               local env_vars=$2
               
               echo "Creating environment for $service_name service..."
-              mkdir -p "environment/$service_name"
+              # Create directory with explicit permissions
+              mkdir -p "/home/ubuntu/MAAP-Files/environment/$service_name"
+              chmod 755 "/home/ubuntu/MAAP-Files/environment/$service_name"
               
               # Create .env file with provided variables
-              echo "$env_vars" > "environment/$service_name/.env"
-              echo "Created .env file for $service_name"
-          }
-          setup_services_env_files() {
-          # Read MongoDB URI from existing .env file
-          if [ -f "/home/ubuntu/MAAP-Files/.env" ]; then
-              MONGODB_URI=$(grep "MONGODB_URI" /home/ubuntu/MAAP-Files/.env | cut -d '=' -f2-)
-              if [ -z "$MONGODB_URI" ]; then
-                  echo "Warning: MONGODB_URI not found in existing .env file"
-                  MONGODB_URI="\${MONGODB_URI}"
+              echo "$env_vars" > "/home/ubuntu/MAAP-Files/environment/$service_name/.env"
+              
+              # Set permissions on the .env file
+              chmod 644 "/home/ubuntu/MAAP-Files/environment/$service_name/.env"
+              
+              # Ensure ownership is correct (uncomment if running as sudo/root)
+              # chown -R ubuntu:ubuntu "/home/ubuntu/MAAP-Files/environment/$service_name"
+              
+              # Verify the file was created successfully
+              if [ -f "/home/ubuntu/MAAP-Files/environment/$service_name/.env" ]; then
+                  echo "Successfully created .env file for $service_name"
               else
-                  echo "Successfully read MONGODB_URI from existing .env file"
+                  echo "ERROR: Failed to create .env file for $service_name"
               fi
-          else
-              echo "Warning: /home/ubuntu/MAAP-Files/.env file not found"
-              MONGODB_URI="\${MONGODB_URI}"
-          fi
-
-          # Create main environment directory
-          mkdir -p environment
-
-          # Create environment for various services
-          create_service_env "ai-memory" "
-          AWS_REGION=\${AWSRegion}
-          MONGODB_URI=\${MONGODB_URI}
-          SUMMARY_MODEL_ID=\${LLMModelID}
-          EMBEDDING_MODEL_ID=\${EmbeddingModelID}
-          "
-
-          create_service_env "data-loader" "
-          EMBEDDING_MODEL_ID=\${EmbeddingModelID}
-          AWS_REGION=\${AWSRegion}
-          "
-
-          create_service_env "event-logger" "
-          MONGODB_URI=\${MONGODB_URI}
-          "
-
-          create_service_env "host" "
-          MONGODB_URI=\${MONGODB_URI}
-          TAVILY_API_KEY=\${TavilyAPIKey}
-          AWS_REGION=\${AWSRegion}
-          LLM_MODEL_ID=\${LLMModelID}
-          EMBEDDING_MODEL_ID=\${EmbeddingModelID}
-          "
-
-          create_service_env "semantic-cache" "
-          MONGODB_URI=\${MONGODB_URI}
-          AWS_REGION=\${AWSRegion}
-          EMBEDDING_MODEL_ID=\${EmbeddingModelID}
-          "
-
-          echo "Environment setup complete. Directory structure created with .env files."
-
           }
 
+          setup_services_env_files() {
+              # Create main environment directory with appropriate permissions
+              echo "Creating main environment directory..."
+              mkdir -p "/home/ubuntu/MAAP-Files/environment"
+              chmod 755 "/home/ubuntu/MAAP-Files/environment"
+              
+              # Ensure proper ownership (uncomment if running as sudo/root)
+              # chown ubuntu:ubuntu "/home/ubuntu/MAAP-Files/environment"
+              
+              # Read MongoDB URI from existing .env file
+              if [ -f "/home/ubuntu/MAAP-Files/.env" ]; then
+                  MONGODB_URI=$(grep "MONGODB_URI" /home/ubuntu/MAAP-Files/.env | cut -d '=' -f2-)
+                  if [ -z "$MONGODB_URI" ]; then
+                      echo "Warning: MONGODB_URI not found in existing .env file"
+                      # Keep the variable reference if not found
+                      MONGODB_URI=$MONGODB_URI
+                  else
+                      echo "Successfully read MONGODB_URI from existing .env file"
+                  fi
+              else
+                  echo "Warning: /home/ubuntu/MAAP-Files/.env file not found"
+                  # Keep the variable reference if file not found
+                  MONGODB_URI=$MONGODB_URI
+              fi
+              
+              # Create environment for various services
+              create_service_env "ai-memory" "
+          AWS_REGION=${AWSRegion}
+          MONGODB_URI=$MONGODB_URI
+          SUMMARY_MODEL_ID=${LLMModelID}
+          EMBEDDING_MODEL_ID=${EmbeddingModelID}
+          "
+              create_service_env "data-loader" "
+          EMBEDDING_MODEL_ID=${EmbeddingModelID}
+          AWS_REGION=${AWSRegion}
+          "
+              create_service_env "event-logger" "
+          MONGODB_URI=$MONGODB_URI
+          "
+              create_service_env "host" "
+          MONGODB_URI=$MONGODB_URI
+          TAVILY_API_KEY=${TavilyAPIKey}
+          AWS_REGION=${AWSRegion}
+          LLM_MODEL_ID=${LLMModelID}
+          EMBEDDING_MODEL_ID=${EmbeddingModelID}
+          "
+              create_service_env "semantic-cache" "
+          MONGODB_URI=$MONGODB_URI
+          AWS_REGION=${AWSRegion}
+          EMBEDDING_MODEL_ID=${EmbeddingModelID}
+          "
+              
+              echo "Setting proper permissions for all environment files and directories..."
+              find "/home/ubuntu/MAAP-Files/environment" -type d -exec chmod 755 {} \;
+              find "/home/ubuntu/MAAP-Files/environment" -type f -exec chmod 644 {} \;
+              
+              echo "Environment setup complete. Directory structure created with .env files at /home/ubuntu/MAAP-Files/environment/"
+              
+              # List the created files to verify
+              echo "Created environment files:"
+              ls -la /home/ubuntu/MAAP-Files/environment/
+              ls -la /home/ubuntu/MAAP-Files/environment/*/
+              
+              # Debug: Print current user and file ownership
+              echo "Current user: $(whoami)"
+              echo "File ownership:"
+              ls -la "/home/ubuntu/MAAP-Files/environment"
+          }
+          pull_docker_images() {
+              echo "Pulling Docker images..."
+              docker-compose pull || { echo "Docker Compose pull failed. Exiting."; exit 1; }
+          }
 
           deploy_services() {
               echo "Starting Docker services..."
@@ -280,9 +308,9 @@ Resources:
               configure_docker
               clone_repository
               setup_main_env_file
-              pull_docker_images &
               deploy_mongodb
               setup_services_env_files
+              pull_docker_images
               deploy_services
               echo "Instance initialization completed at $(date)."
           }
