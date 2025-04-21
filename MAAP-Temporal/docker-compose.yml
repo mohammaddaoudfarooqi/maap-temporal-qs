@@ -2,7 +2,7 @@ services:
   event-logger:
     image: event-logger
     env_file:
-      - environment/event-logger/.env
+      - ../environment/event-logger/.env
     networks:
       - temporal-network
     ports:
@@ -10,7 +10,7 @@ services:
   ai-memory:
     image: ai-memory
     env_file:
-      - environment/ai-memory/.env
+      - ../environment/ai-memory/.env
     depends_on:
       - event-logger
     networks:
@@ -20,7 +20,7 @@ services:
   semantic-cache:
     image: semantic-cache
     env_file:
-      - environment/semantic-cache/.env
+      - ../environment/semantic-cache/.env
     depends_on:
       - event-logger
     networks:
@@ -31,7 +31,7 @@ services:
   data-loader:
     image: data-loader
     env_file:
-      - environment/data-loader/.env
+      - ../environment/data-loader/.env
     depends_on:
       - event-logger
     networks:
@@ -41,7 +41,7 @@ services:
   host:
     image: host
     env_file:
-      - environment/host/.env
+      - ../environment/host/.env
     depends_on:
       - event-logger
       - ai-memory
