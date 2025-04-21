@@ -10,7 +10,7 @@ services:
   ai-memory:
     image: public.ecr.aws/s2e1n3u8/maap-temporal-qs-ai-memory:latest
     env_file:
-      - environment/ai_memory/.env
+      - environment/ai-memory/.env
     depends_on:
       - event-logger
     networks:
