@@ -5,8 +5,8 @@ services:
       - ../environment/event-logger/.env
     networks:
       - temporal-network
-    ports:
-      - 8181:8181
+    environment:
+      - PORT=8181
   ai-memory:
     image: ai-memory
     env_file:
@@ -15,8 +15,8 @@ services:
       - event-logger
     networks:
       - temporal-network
-    ports:
-      - 8182:8182
+    environment:
+      - PORT=8182
   semantic-cache:
     image: semantic-cache
     env_file:
@@ -25,8 +25,8 @@ services:
       - event-logger
     networks:
       - temporal-network
-    ports:
-      - 8183:8183
+    environment:
+      - PORT=8183
   
   data-loader:
     image: data-loader
@@ -36,8 +36,8 @@ services:
       - event-logger
     networks:
       - temporal-network
-    ports:
-      - 8184:8184
+    environment:
+      - PORT=8184
   host:
     image: host
     env_file:
