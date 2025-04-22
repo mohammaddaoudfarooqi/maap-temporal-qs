@@ -16,7 +16,7 @@ AWS_Zone="a"  #Subnet and Server AWS Availability Zone
 AvailabilityZone="$AWS_REGION$AWS_Zone"
 EC2_INSTANCE_TYPE="t3.xlarge"
 ServerInstanceProfile="MAAPTemporalServerInstanceProfile"
-
+IMDSv2LaunchTemplateName="IMDSv2"
 VolumeSize=100 #Disk Storage Space
 
 GIT_REPO_URL="https://github.com/mohammaddaoudfarooqi/maap-temporal-qs"
@@ -201,6 +201,7 @@ deploy_ec2()
       ParameterKey=TavilyAPIKey,ParameterValue="$TAVILY_API_KEY" \
       ParameterKey=LLMModelID,ParameterValue="$LLM_MODEL_ID" \
       ParameterKey=EmbeddingModelID,ParameterValue="$EMBEDDING_MODEL_ID" \
+      ParameterKey=IMDSv2LaunchTemplateName,ParameterValue="$IMDSv2LaunchTemplateName" \
       ParameterKey=GROUPID,ParameterValue="$GROUPID")"
 
   log_message "CloudFormation stack creation initiated. Waiting for stack to complete..."
@@ -230,6 +231,7 @@ deploy_ec2()
     --output text)
 
   FULL_URL="http://$URL:7860"
+  TEMPORAL_URL="http://$URL:8080"
 
   log_message "The application will be available at $FULL_URL once all the deployment is complete."
 
@@ -268,6 +270,8 @@ while true; do
     log_message "The application is now live at $FULL_URL. Launching..."
     # Launch the URL in the default web browser
     open "$FULL_URL" &>/dev/null || xdg-open "$FULL_URL" || log_message "Please open $FULL_URL in your browser."
+    sleep 1
+    open "$TEMPORAL_URL" &>/dev/null || xdg-open "$TEMPORAL_URL" || log_message "Please open $TEMPORAL_URL in your browser."
     sleep 30
     kill "$SSH_PID" &>/dev/null
     log_message "Completed."

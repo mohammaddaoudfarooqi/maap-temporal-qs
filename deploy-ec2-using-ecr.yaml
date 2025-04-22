@@ -91,11 +91,29 @@ Parameters:
     Type: String
     Default: amazon.titan-embed-text-v1
 
+  IMDSv2LaunchTemplateName:
+    Description: IMDSv2 Launch Template Name.
+    Type: String
+    Default: IMDSV2
+
 Resources:
+  IMDSv2LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Ref IMDSv2LaunchTemplateName
+      LaunchTemplateData:
+        MetadataOptions:
+          HttpEndpoint: enabled
+          HttpPutResponseHopLimit: 2
+          HttpTokens: required
+
   EC2Instance:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: !Ref InstanceType
+      LaunchTemplate: 
+        LaunchTemplateId: !Ref IMDSv2LaunchTemplate
+        Version: !GetAtt IMDSv2LaunchTemplate.LatestVersionNumber
       KeyName: !Ref KeyName
       ImageId: !Ref AMIId
       SubnetId: !Ref SubnetId
@@ -120,6 +138,8 @@ Resources:
         - Key: expire-on
           Value: 2030-12-31
       IamInstanceProfile: !Ref IAMInstanceProfile
+
+
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -169,6 +189,7 @@ Resources:
           TAVILY_API_KEY=${TavilyAPIKey}
           LLM_MODEL_ID=${LLMModelID}
           EMBEDDING_MODEL_ID=${EmbeddingModelID}
+          
           EOF
           }
 
@@ -257,6 +278,8 @@ Resources:
           AWS_REGION=${AWSRegion}
           LLM_MODEL_ID=${LLMModelID}
           EMBEDDING_MODEL_ID=${EmbeddingModelID}
+          LOGGER_SERVICE_URL=http://event-logger:8181
+          APP_NAME=MAAP-MCP-Host
           "
               create_service_env "semantic-cache" "
           MONGODB_URI=$MONGODB_URI
@@ -288,6 +311,9 @@ Resources:
           deploy_services() {
               echo "Starting Docker services..."
 
+              sudo iptables -A DOCKER-USER -d 169.254.169.254 -j ACCEPT
+              sudo iptables-save
+
               docker network inspect temporal-network >/dev/null 2>&1 || docker network create temporal-network
 
               rm -rf docker-compose && git clone https://github.com/temporalio/docker-compose.git
@@ -300,6 +326,9 @@ Resources:
               if ! docker-compose up -d; then
                   { echo "Docker Compose failed to start services. Exiting."; exit 1; }
               fi
+
+
+
           }
 
           main() {

@@ -12,7 +12,7 @@ import sys
 from dotenv import load_dotenv
 load_dotenv()
 
-LOGGER_SERVICE_URL= os.getenv("LOGGER_SERVICE_URL")
+LOGGER_SERVICE_URL= os.getenv("LOGGER_SERVICE_URL", "http://event-logger:8181")
 APP_NAME=os.getenv("APP_NAME", "MAAP-MCP")
 
 class MaapLogger:
