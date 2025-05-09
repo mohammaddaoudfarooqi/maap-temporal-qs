@@ -16,7 +16,7 @@
 
 ### 1. Overview
 
-AI-Memory-Service is an advanced AI-powered memory management system designed to store, retrieve, and analyze conversation histories and user memories. It leverages MongoDB for data storage, AWS Bedrock for AI capabilities, and FastAPI for API endpoints. The service provides functionalities for adding conversation messages, searching memories, generating conversation summaries, and managing a hierarchical memory structure.
+AI-Memory-Service is an advanced AI-powered memory management system designed to store, retrieve, and analyze conversation histories and user memories. It leverages MongoDB Atlas for data storage, AWS Bedrock for AI capabilities, and FastAPI for API endpoints. The service provides functionalities for adding conversation messages, searching memories, generating conversation summaries, and managing a hierarchical memory structure.
 
 Key features include:
 - Conversation history storage and retrieval
@@ -30,7 +30,7 @@ Key features include:
 ```mermaid
 graph TD
     A[Client] --> B[FastAPI Server]
-    B --> C[MongoDB]
+    B --> C[MongoDB Atlas]
     B --> D[AWS Bedrock]
     C --> E[Conversations Collection]
     C --> F[Memory Nodes Collection]
@@ -38,7 +38,7 @@ graph TD
     D --> H[LLM Model]
 ```
 
-The system consists of a FastAPI server that interacts with MongoDB for data storage and AWS Bedrock for AI operations. The MongoDB database contains two main collections: Conversations and Memory Nodes. AWS Bedrock provides embedding generation and language model capabilities.
+The system consists of a FastAPI server that interacts with MongoDB Atlas for data storage and AWS Bedrock for AI operations. The MongoDB database contains two main collections: Conversations and Memory Nodes. AWS Bedrock provides embedding generation and language model capabilities.
 
 ### 3. Components
 
